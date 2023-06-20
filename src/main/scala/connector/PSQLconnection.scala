@@ -9,8 +9,8 @@ case class PSQLconnection(host: String, port: String, database: String) {
 //  final val URL = basePath + "//" + host + ":" + port + database
   final val URL = basePath + s"//$host:$port/$database"
 
-  val username = "user"
-  val password = "password"
+  val username = "postgres"
+  val password = "postgres"
 
   def getConnection: Connection = {
     try
