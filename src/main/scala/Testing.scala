@@ -2,9 +2,10 @@ import connector.PSQLconnection
 
 object Testing {
   def main(args: Array[String]): Unit = {
-    print("Hi")
+    println("Hi")
 // have to create database in POSTGRESSQL
-    PSQLconnection("localhost","kos-1119,")
+    val schema = PSQLconnection("localhost", "5432", "WINE_SHOP").getConnection.isValid(1000)
+    println(schema)
   }
 }
 ////@main def Hello(): Unit =
