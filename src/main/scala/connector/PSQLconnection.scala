@@ -22,7 +22,8 @@ case class PSQLconnection(host: String, port: String, database: String) {
 
       if connection.isValid(1000) 
       then 
-        println("Connection success") 
+        println("Connection success")
+        connection.setAutoCommit(true)
         connection 
       else 
         println(" Failed to make connection")

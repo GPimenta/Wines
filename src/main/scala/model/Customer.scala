@@ -1,3 +1,3 @@
 package model
 
-case class Customer(id: Integer, firstName: String, LastName: String, email: String)
+case class Customer(id: Integer, firstName: String, lastName: String, email: String)
