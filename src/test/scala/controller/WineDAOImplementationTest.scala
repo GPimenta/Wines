@@ -2,6 +2,7 @@ package controller
 
 import connector.PSQLconnection
 import model.Customer
+import model.Wine
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.util.{Failure, Success}
@@ -46,16 +47,16 @@ class WineDAOImplementationTest extends AnyFunSuite {
 //
 //  test("Get by Wine name") {
 //    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
-//    implementation.getByNameWine("Sauvignon Blanc") match
+//    implementation.getWine(Wine(1,"Syrah", "Merlot", 1988, "Cogibox", 520.08)) match
 //      case Failure(exception) => exception.printStackTrace()
-//      case Success(wineList) => wineList match
+//      case Success(wine) => wine match
 //        case Left(value) => println(value)
-//        case Right(value) => value.foreach(Wine => println(Wine))
+//        case Right(value) => println(value)
 //  }
 //
 //  test("Get by Customer full name") {
 //    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
-//    implementation.getByIdCustomer(1) match
+//    implementation.getCustomer(Customer(1, "Phedra", "Goffe", "pgoffe6@salon.com")) match
 //      case Failure(exception) => exception.printStackTrace()
 //      case Success(customer) => customer match
 //        case Left(value) => println(value)
@@ -85,7 +86,25 @@ class WineDAOImplementationTest extends AnyFunSuite {
 //
 //  }
 
+//    test("Update Wine") {
+//      val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+//      implementation.updateWine("Gewürztraminer", "Pinot Noir", 1977, "Skynoodle", 13.65, 100) match
+//        case Failure(exception) => exception.printStackTrace()
+//        case Success(value) => value match
+//          case Left(value) => println(value)
+//          case Right(value) => println(value)
+//
+//    }
 
+      test("Update Customer") {
+        val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+        implementation.updateCustomer("Ethelbert", "Cubin", "ecubin7@yale.edu", "ecubin7@yale.com") match
+          case Failure(exception) => exception.printStackTrace()
+          case Success(value) => value match
+            case Left(value) => println(value)
+            case Right(value) => println(value)
+
+      }
 
 
 }
