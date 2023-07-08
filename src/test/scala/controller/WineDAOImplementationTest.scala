@@ -96,15 +96,32 @@ class WineDAOImplementationTest extends AnyFunSuite {
 //
 //    }
 
-      test("Update Customer") {
-        val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
-        implementation.updateCustomer("Ethelbert", "Cubin", "ecubin7@yale.edu", "ecubin7@yale.com") match
-          case Failure(exception) => exception.printStackTrace()
-          case Success(value) => value match
-            case Left(value) => println(value)
-            case Right(value) => println(value)
+//  test("Update Customer") {
+//    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+//    implementation.updateCustomer("Ethelbert", "Cubin", "ecubin7@yale.edu", "ecubin7@yale.com") match
+//      case Failure(exception) => exception.printStackTrace()
+//      case Success(value) => value match
+//        case Left(value) => println(value)
+//        case Right(value) => println(value)
+//
+//  }
 
-      }
+//  test("Delete Wine") {
+//    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+//    implementation.deleteWine("Zinfandel", "Cabernet Sauvignon", 1987, "Mybuzz", 543.86) match
+//      case Failure(exception) => exception.printStackTrace()
+//      case Success(value) => value match
+//        case Left(value) => println(value)
+//        case Right(value) => println(value)
+//  }
 
+  test("Delete Customer") {
+    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+    implementation.deleteCustomer("Kurtis", "MacRory", "kmacrory9@google.co.jp") match
+      case Failure(exception) => exception.printStackTrace()
+      case Success(value) => value match
+        case Left(value) => println(value)
+        case Right(value) => println(value)
+  }
 
 }

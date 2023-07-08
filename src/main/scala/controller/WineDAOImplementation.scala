@@ -13,11 +13,13 @@ case class WineDAOImplementation(connection: PSQLconnection) {
   private final val QUERY_WINE_ID = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE id = ?;"
   private final val QUERY_CUSTOMER_ID = "SELECT id, first_name, last_name, email FROM Customer WHERE id = ?;"
   private final val QUERY_WINE_NAME = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
-  private final val QUERY_CUSTOMER_FULL_NAME = "SELECT id, first_name, last_name, email FROM Customer WHERE first_name = ? AND last_name = ?;"
+  private final val QUERY_CUSTOMER_FULL_NAME = "SELECT id, first_name, last_name, email FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
   private final val INSERT_WINE = "INSERT INTO Wine (wine_name, grape_variety, vintage_year, winery_name, price) VALUES (?, ?, ?, ?, ?);"
   private final val INSERT_CUSTOMER = "INSERT INTO Customer (first_name, last_name, email) VALUES (?, ?, ?);"
   private final val UPDATE_WINE = "UPDATE Wine SET price = ? WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
   private final val UPDATE_CUSTOMER = "UPDATE Customer SET email = ? WHERE first_name = ? AND last_name = ? AND email = ?"
+  private final val DELETE_WINE = "DELETE FROM Wine WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
+  private final val DELETE_CUSTOMER = "DELETE FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
 
 
 
@@ -235,4 +237,45 @@ case class WineDAOImplementation(connection: PSQLconnection) {
               case _ => Right(false)
     }
   }
+
+  def deleteWine(wineName: String, grapeVariety: String, vintageYear: Integer, wineryName: String, price: BigDecimal): Try[Either[String, Boolean]] = {
+    Try {
+      getWine(wineName, grapeVariety, vintageYear, wineryName, price) match
+        case Failure(exception) => Left(exception.printStackTrace().toString)
+        case Success(result) => result match
+          case Left(notFound) => Left(notFound)
+          case Right(customer) =>
+            val preparedStatement = connection.getConnection.prepareStatement(DELETE_WINE)
+            preparedStatement.setString(1, wineName)
+            preparedStatement.setString(2, grapeVariety)
+            preparedStatement.setInt(3, vintageYear)
+            preparedStatement.setString(4, wineryName)
+            preparedStatement.setBigDecimal(5, price.bigDecimal)
+
+            preparedStatement.executeUpdate() match
+              case 1 => Right(true)
+              case 0 => Left("Not deleted")
+              case _ => Right(false)
+    }
+  }
+
+  def deleteCustomer(firstName: String, lastName: String, email: String): Try[Either[String, Boolean]] = {
+    Try {
+      getCustomer(firstName, lastName, email) match
+        case Failure(exception) => Left(exception.printStackTrace().toString)
+        case Success(result) => result match
+          case Left(notFound) => Left(notFound)
+          case Right(customer) =>
+            val preparedStatement = connection.getConnection.prepareStatement(DELETE_CUSTOMER)
+            preparedStatement.setString(1, firstName)
+            preparedStatement.setString(2, lastName)
+            preparedStatement.setString(3, email)
+
+            preparedStatement.executeUpdate() match
+              case 1 => Right(true)
+              case 0 => Left("Not deleted")
+              case _ => Right(false)
+    }
+  }
+
 }
