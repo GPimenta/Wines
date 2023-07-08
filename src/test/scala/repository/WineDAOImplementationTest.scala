@@ -1,8 +1,7 @@
-package controller
+package repository
 
 import connector.PSQLconnection
-import model.Customer
-import model.Wine
+import model.{Customer, Wine}
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.util.{Failure, Success}
@@ -115,13 +114,13 @@ class WineDAOImplementationTest extends AnyFunSuite {
 //        case Right(value) => println(value)
 //  }
 
-  test("Delete Customer") {
-    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
-    implementation.deleteCustomer("Kurtis", "MacRory", "kmacrory9@google.co.jp") match
-      case Failure(exception) => exception.printStackTrace()
-      case Success(value) => value match
-        case Left(value) => println(value)
-        case Right(value) => println(value)
-  }
+//  test("Delete Customer") {
+//    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+//    implementation.deleteCustomer("Kurtis", "MacRory", "kmacrory9@google.co.jp") match
+//      case Failure(exception) => exception.printStackTrace()
+//      case Success(value) => value match
+//        case Left(value) => println(value)
+//        case Right(value) => println(value)
+//  }
 
 }
