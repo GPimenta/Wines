@@ -21,9 +21,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
   private final val DELETE_WINE = "DELETE FROM Wine WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
   private final val DELETE_CUSTOMER = "DELETE FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
 
-//// On gets have to put Option...
-
-  def getAllWines: Try[List[Wine]] = {
+  def getAllWines: Try[Either[String, List[Wine]]] = {
     Try {
       val preparedStatement = connection.getConnection.prepareStatement(SELECT_ALL_WINES)
       val resultSet = preparedStatement.executeQuery()
@@ -40,7 +38,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
         wineList += wine
       }
       preparedStatement.close()
-      wineList.toList
+      if wineList.nonEmpty then Right(wineList.toList) else Left("Empty list")
     }
   }
 
@@ -59,7 +57,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
           customerList += customer
         }
         preparedStatement.close()
-        customerList.toList
+        if customerList.nonEmpty then Right(customerList.toList) else Left("Empty list")
       }
     }
 
@@ -68,10 +66,9 @@ case class WineDAOImplementation(connection: PSQLconnection) {
       val preparedStatement = connection.getConnection.prepareStatement(QUERY_WINE_ID)
       preparedStatement.setInt(1, id)
       val resultSet = preparedStatement.executeQuery()
-      var wine: Wine = null
 
       if (resultSet.next()) {
-        val value = Right(Wine(resultSet.getInt("id"),
+        val wine = Right(Wine(resultSet.getInt("id"),
           resultSet.getString("wine_name"),
           resultSet.getString("grape_variety"),
           resultSet.getInt("vintage_year"),
@@ -79,7 +76,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
           resultSet.getBigDecimal("price")
         ))
         preparedStatement.close()
-        value
+        wine
       } else {
         preparedStatement.close()
         Left("Not found")
