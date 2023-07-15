@@ -42,7 +42,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
     }
   }
 
-    def getAllCustomers: Try[List[Customer]] = {
+    def getAllCustomers: Try[Either[String, List[Customer]]] = {
       Try {
         val preparedStatement = connection.getConnection.prepareStatement(SELECT_ALL_CUSTOMERS)
         val resultSet = preparedStatement.executeQuery()
@@ -157,37 +157,44 @@ case class WineDAOImplementation(connection: PSQLconnection) {
     }
   }
 //"INSERT INTO Wine (wine_name, grape_variety, vintage_year, winery_name, price) VALUES (?, ?, ?, ?, ?)"
-  def setWine(wine: Wine): Try[Either[String, Boolean]] = {
+  def setWine(wine: Wine): Try[Either[String, Wine]] = {
     Try {
-      val con = connection.getConnection
-      val preparedStatement = con.prepareStatement(INSERT_WINE)
-      preparedStatement.setString(1, wine.wineName)
-      preparedStatement.setString(2, wine.grapeVariety)
-      preparedStatement.setInt(3, wine.vintageYear)
-      preparedStatement.setString(4, wine.wineryName)
-      preparedStatement.setBigDecimal(5, wine.price.bigDecimal)
+      getWine(wine) match
+        case Failure(exception) => Left(exception.printStackTrace().toString)
+        case Success(result) => result match
+          case Right(found) => Right(found)
+          case Left(value) =>
+            val con = connection.getConnection
+            val preparedStatement = con.prepareStatement(INSERT_WINE)
+            preparedStatement.setString(1, wine.wineName)
+            preparedStatement.setString(2, wine.grapeVariety)
+            preparedStatement.setInt(3, wine.vintageYear)
+            preparedStatement.setString(4, wine.wineryName)
+            preparedStatement.setBigDecimal(5, wine.price.bigDecimal)
 
-      preparedStatement.executeUpdate match
-        case 1 => Right(true)
-        case 0 => Left("No Insertion")
-        case _ => Right(false)
-
+            preparedStatement.executeUpdate match
+              case 1 => Right(wine)
+              case 0 => Left("No Insertion")
     }
   }
 
 
-  def setCustomer(customer: Customer): Try[Either[String, Boolean]] = {
+  def setCustomer(customer: Customer): Try[Either[String, Customer]] = {
     Try {
-      val con = connection.getConnection
-      val preparedStatement = con.prepareStatement(INSERT_CUSTOMER)
-      preparedStatement.setString(1, customer.firstName)
-      preparedStatement.setString(2, customer.lastName)
-      preparedStatement.setString(3, customer.email)
+      getCustomer(customer) match
+        case Failure(exception) => Left(exception.printStackTrace().toString)
+        case Success(result) => result match
+          case Right(found) => Right(found)
+          case Left(value) =>
+            val con = connection.getConnection
+            val preparedStatement = con.prepareStatement(INSERT_CUSTOMER)
+            preparedStatement.setString(1, customer.firstName)
+            preparedStatement.setString(2, customer.lastName)
+            preparedStatement.setString(3, customer.email)
 
-      preparedStatement.executeUpdate match
-        case 1 => Right(true)
-        case 0 => Left("No Insertion")
-        case _ => Right(false)
+            preparedStatement.executeUpdate match
+              case 1 => Right(customer)
+              case 0 => Left("No Insertion")
     }
   }
   //"UPDATE Wine SET price = ? WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?"
