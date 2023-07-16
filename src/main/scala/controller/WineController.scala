@@ -54,4 +54,16 @@ class WineController(wineDAOImplementation: WineDAOImplementation) {
       case Success(result) => result.map(customerUnit => customerUnit)
   }
 
+  def deleteWine(wine: Wine): Either[String, String] = {
+    wineDAOImplementation.deleteWine(wine) match
+      case Failure(exception) => Left(exception.printStackTrace().toString)
+      case Success(result) => result.map(response => response)
+  }
+  
+  def deleteCustomer(customer: Customer): Either[String, String] = {
+    wineDAOImplementation.deleteCustomer(customer) match
+      case Failure(exception) => Left(exception.printStackTrace().toString)
+      case Success(result) => result.map(response => response)
+  }
+
 }

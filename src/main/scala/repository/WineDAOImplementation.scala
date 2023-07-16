@@ -143,13 +143,13 @@ case class WineDAOImplementation(connection: PSQLconnection) {
       val resultSet = preparedStatement.executeQuery()
 
       if (resultSet.next()) {
-        val value = Right(Customer(resultSet.getInt("id"),
+        val customer = Customer(resultSet.getInt("id"),
           resultSet.getString("first_name"),
           resultSet.getString("last_name"),
           resultSet.getString("email")
-        ))
+        )
         preparedStatement.close()
-        value
+        Right(customer)
       } else {
         preparedStatement.close()
         Left("Not found")
@@ -177,7 +177,6 @@ case class WineDAOImplementation(connection: PSQLconnection) {
               case 0 => Left("No Insertion")
     }
   }
-
 
   def setCustomer(customer: Customer): Try[Either[String, Customer]] = {
     Try {
@@ -241,7 +240,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
     }
   }
 
-  def deleteWine(wine: Wine): Try[Either[String, Boolean]] = {
+  def deleteWine(wine: Wine): Try[Either[String, String]] = {
     Try {
       getWine(wine) match
         case Failure(exception) => Left(exception.printStackTrace().toString)
@@ -256,13 +255,12 @@ case class WineDAOImplementation(connection: PSQLconnection) {
             preparedStatement.setBigDecimal(5, wine.price.bigDecimal)
 
             preparedStatement.executeUpdate() match
-              case 1 => Right(true)
+              case 1 => Right("Deleted")
               case 0 => Left("Not deleted")
-              case _ => Right(false)
     }
   }
 
-  def deleteCustomer(customer: Customer): Try[Either[String, Boolean]] = {
+  def deleteCustomer(customer: Customer): Try[Either[String, String]] = {
     Try {
       getCustomer(customer) match
         case Failure(exception) => Left(exception.printStackTrace().toString)
@@ -275,10 +273,8 @@ case class WineDAOImplementation(connection: PSQLconnection) {
             preparedStatement.setString(3, customer.email)
 
             preparedStatement.executeUpdate() match
-              case 1 => Right(true)
+              case 1 => Right("Deleted")
               case 0 => Left("Not deleted")
-              case _ => Right(false)
     }
   }
-
 }
