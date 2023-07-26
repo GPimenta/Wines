@@ -1,3 +1,3 @@
 package model
 
-case class Wine(id: Integer, wineName: String, grapeVariety: String, vintageYear: Integer, wineryName: String, price: BigDecimal)
+case class Wine(id: Int, wineName: String, grapeVariety: String, vintageYear: Int, wineryName: String, price: BigDecimal)

@@ -4,7 +4,7 @@ import repository.WineDAOImplementation
 import model.{Customer, NewCustomer, NewWine, Wine}
 import scala.util.{Failure, Success}
 
-class WineController(wineDAOImplementation: WineDAOImplementation) {
+case class WineController(wineDAOImplementation: WineDAOImplementation) {
 
   def getAllWines: Either[String, List[Wine]] = {
     wineDAOImplementation.getAllWines match
