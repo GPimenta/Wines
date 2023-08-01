@@ -43,13 +43,22 @@ class WineDAOImplementationTest extends AnyFunSuite {
       case Success(customer) => println(customer)
   }
 
-  test("Get by Wine name") {
+  test("Get by Wine") {
     val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
     implementation.getWine(Wine(1,"Syrah", "Merlot", 1988, "Cogibox", 520.08)) match
       case Failure(exception) => exception.printStackTrace()
       case Success(wine) => wine match
         case Left(value) => println(value)
         case Right(wineUnit) => println(wineUnit)
+  }
+
+  test("Get by Wine name") {
+    val implementation = WineDAOImplementation(PSQLconnection("localhost", "5432", "WINE_SHOP"))
+    implementation.getWineByName("Pinot Noir") match
+      case Failure(exception) => exception.printStackTrace()
+      case Success(wine) => wine match
+        case Left(value) => println(value)
+        case Right(wineList) => println(wineList)
   }
 
   test("Get by Customer full name") {

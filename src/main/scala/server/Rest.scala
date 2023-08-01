@@ -36,22 +36,56 @@ object Rest extends DefaultJsonProtocol{
     }
 
     val route:Route =
-      pathPrefix("Wines") {
+      pathPrefix("wines") {
         concat(
           get{
             concat(
               pathEndOrSingleSlash{
                 wineObject.getAllWines match
-                  case Left(message) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$message"} """))
-                  case Right(list) if list.isEmpty => complete(NotFound, HttpEntity(ContentTypes.`application/json`,""" {"message" : "Not Found"} """))
-                  case Right(list) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"result" : "$list"} """))
+                  case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                  case Left(emptyList) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Wines is Empty"} """))
+                  case Right(wineList) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine List" : "$wineList"} """))
               },
-              path(Segment) { name =>
-                wineObject.getWine(name) match
-                  case Left(message) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$message"} """))
-                  case Right(value) => ???
+              //http://localhost:8080/wines/{id}
+              path(Segment) {
+                id => wineObject.getWineById(id.toInt) match
+                  case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                  case Left(notFound) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Wine with ID $id not found"} """))
+                  case Right(wine) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine with id $id" : "$wine"} """))
+              },
+              //http://localhost:8080/wines/name/?wine_name=Pinot%20Noir
+              pathPrefix("name"){
+                parameter("wine_name") {
+                  wineName =>
+                    wineObject.getWineByName(wineName) match
+                      case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                      case Left(emptyList) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Wines is Empty"} """))
+                      case Right(wineList) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine List" : "$wineList"} """))
+                }
               }
             )
+          },
+          post{
+            pathEndOrSingleSlash{
+              entity(as[Wine]) {
+                wine =>
+                  wineObject.setWine(wine) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(failedInsertion) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Insertion failed"} """))
+                    case Right(wineInserted) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine inserted"} """))
+              }
+            }
+          },
+          put{
+            pathEndOrSingleSlash{
+              entity(as[NewWine]) {
+                newWine =>
+                  wineObject.updateWine(newWine) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(failedUpdate) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Update failed"} """))
+                    case Right(wineUpdated) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine updated"} """))
+              }
+            }
           }
         )
       }

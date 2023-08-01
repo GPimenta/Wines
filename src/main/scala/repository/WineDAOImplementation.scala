@@ -12,7 +12,8 @@ case class WineDAOImplementation(connection: PSQLconnection) {
   private final val SELECT_ALL_CUSTOMERS = "SELECT * FROM Customer;"
   private final val QUERY_WINE_ID = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE id = ?;"
   private final val QUERY_CUSTOMER_ID = "SELECT id, first_name, last_name, email FROM Customer WHERE id = ?;"
-  private final val QUERY_WINE_NAME = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
+  private final val QUERY_WINE_OBJECT = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
+  private final val QUERY_WINE_NAME = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE wine_name = ?;"
   private final val QUERY_CUSTOMER_FULL_NAME = "SELECT id, first_name, last_name, email FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
   private final val INSERT_WINE = "INSERT INTO Wine (wine_name, grape_variety, vintage_year, winery_name, price) VALUES (?, ?, ?, ?, ?);"
   private final val INSERT_CUSTOMER = "INSERT INTO Customer (first_name, last_name, email) VALUES (?, ?, ?);"
@@ -109,7 +110,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
 
   def getWine(wine: Wine): Try[Either[String, Wine]] = {
     Try {
-      val preparedStatement = connection.getConnection.prepareStatement(QUERY_WINE_NAME)
+      val preparedStatement = connection.getConnection.prepareStatement(QUERY_WINE_OBJECT)
       preparedStatement.setString(1, wine.wineName)
       preparedStatement.setString(2, wine.grapeVariety)
       preparedStatement.setInt(3, wine.vintageYear)
@@ -133,6 +134,30 @@ case class WineDAOImplementation(connection: PSQLconnection) {
       }
     }
   }
+
+  def getWineByName(wineName: String): Try[Either[String, List[Wine]]] = {
+    Try {
+      val preparedStatement = connection.getConnection.prepareStatement(QUERY_WINE_NAME)
+      preparedStatement.setString(1, wineName)
+      val resultSet = preparedStatement.executeQuery()
+      var wineList = ListBuffer[Wine]()
+
+      while (resultSet.next()) {
+        val wine = Wine(resultSet.getInt("id"),
+          resultSet.getString("wine_name"),
+          resultSet.getString("grape_variety"),
+          resultSet.getInt("vintage_year"),
+          resultSet.getString("winery_name"),
+          resultSet.getBigDecimal("price")
+        )
+        wineList += wine
+      }
+      preparedStatement.close()
+      if wineList.nonEmpty then Right(wineList.toList) else Left("Empty list")
+    }
+  }
+
+
 
   def getCustomer(customer: Customer): Try[Either[String, Customer]] = {
     Try {
@@ -198,7 +223,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
   }
   //"UPDATE Wine SET price = ? WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?"
   // Only Price can change
-  def updateWine(newWine: NewWine): Try[Either[String, Boolean]] = {
+  def updateWine(newWine: NewWine): Try[Either[String, String]] = {
     Try {
       getWine(Wine(newWine.id, newWine.wineName, newWine.grapeVariety, newWine.vintageYear, newWine.wineryName, newWine.price)) match
         case Failure(exception) => Left(exception.printStackTrace().toString)
@@ -214,13 +239,12 @@ case class WineDAOImplementation(connection: PSQLconnection) {
             preparedStatement.setBigDecimal(6, newWine.price.bigDecimal)
 
             preparedStatement.executeUpdate match
-              case 1 => Right(true)
+              case 1 => Right("Updated")
               case 0 => Left("No update")
-              case _ => Right(false)
     }
   }
 
-  def updateCustomer(newCustomer: NewCustomer): Try[Either[String, Boolean]] = {
+  def updateCustomer(newCustomer: NewCustomer): Try[Either[String, String]] = {
     Try {
       getCustomer(Customer(newCustomer.id, newCustomer.firstName, newCustomer.lastName, newCustomer.email)) match
         case Failure(exception) => Left(exception.printStackTrace().toString)
@@ -234,9 +258,8 @@ case class WineDAOImplementation(connection: PSQLconnection) {
             preparedStatement.setString(4, newCustomer.email)
 
             preparedStatement.executeUpdate match
-              case 1 => Right(true)
+              case 1 => Right("Updated")
               case 0 => Left("No update")
-              case _ => Right(false)
     }
   }
 

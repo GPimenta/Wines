@@ -34,8 +34,14 @@ class WineControllerTest extends AnyFunSuiteLike {
       case Right(customer) => println(customer)
   }
 
-  test("testGetWine") {
-    controller.getWine(Wine(1, "Syrah", "Merlot", 1988, "Cogibox", 520.08)) match
+//  test("testGetWine") {
+//    controller.getWine(Wine(1, "Syrah", "Merlot", 1988, "Cogibox", 520.08)) match
+//      case Left(noValue) => println(noValue)
+//      case Right(value) => println(value)
+//  }
+
+  test("testGetWineByName") {
+    controller.getWineByName("Pinot Noir") match
       case Left(noValue) => println(noValue)
       case Right(value) => println(value)
   }
