@@ -35,7 +35,7 @@ object Rest extends DefaultJsonProtocol{
       }
     }
 
-    val route:Route =
+    val wineRoute:Route =
       pathPrefix("wines") {
         concat(
           get{
@@ -86,13 +86,86 @@ object Rest extends DefaultJsonProtocol{
                     case Right(wineUpdated) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine updated"} """))
               }
             }
+          },
+          delete{
+            pathEndOrSingleSlash{
+              entity(as[Wine]) {
+                wine =>
+                  wineObject.deleteWine(wine) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(failedDelete) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Delete failed"} """))
+                    case Right(wineDeleted) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine Deleted"} """))
+              }
+            }
           }
         )
       }
 
-    Http().newServerAt("0.0.0.0", 8080).bind(concat(route, base))
+    val customerRoute: Route =
+      pathPrefix("customers") {
+        concat(
+          get{
+            concat(
+              pathEndOrSingleSlash{
+                wineObject.getAllCustomers match
+                  case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                  case Left(emptyList) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Customer is Empty"} """))
+                  case Right(customerList) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer List" : "$customerList"} """))
+              },
+              path(Segment) {
+                id =>
+                  wineObject.getCustomerById(id.toInt) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(notFound) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Customer with ID $id not found"} """))
+                    case Right(wine) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer with id $id" : "$wine"} """))
+              },
+              pathPrefix("name") {
+                parameter("first_name", "last_name", "email") {
+                  (firstName, lastName, email) =>
+                    wineObject.getCustomerByNameEmail(firstName, lastName, email) match
+                      case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                      case Left(notFound) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Customer not found"} """))
+                      case Right(customer) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer" : "$customer"} """))
+                }
+              }
+            )
+          },
+          post {
+            pathEndOrSingleSlash {
+              entity(as[Customer]) {
+                customer =>
+                  wineObject.setCustomer(customer) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(failedInsertion) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Insertion failed"} """))
+                    case Right(customerInserted) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer inserted"} """))
+              }
+            }
+          },
+          put {
+            pathEndOrSingleSlash {
+              entity(as[NewCustomer]) {
+                newCustomer =>
+                  wineObject.updateCustomer(newCustomer) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(failedUpdate) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Update failed"} """))
+                    case Right(customerUpdated) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer updated"} """))
+              }
+            }
+          },
+          delete {
+            pathEndOrSingleSlash {
+              entity(as[Customer]) {
+                customer =>
+                  wineObject.deleteCustomer(customer) match
+                    case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
+                    case Left(failedInsertion) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Delete failed"} """))
+                    case Right(customerInserted) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer deleted"} """))
+              }
+            }
+          }
+        )
+      }
+    Http().newServerAt("0.0.0.0", 8080).bind(concat(wineRoute, customerRoute, base))
     StdIn.readLine()
-
   }
-
 }

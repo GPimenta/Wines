@@ -14,7 +14,8 @@ case class WineDAOImplementation(connection: PSQLconnection) {
   private final val QUERY_CUSTOMER_ID = "SELECT id, first_name, last_name, email FROM Customer WHERE id = ?;"
   private final val QUERY_WINE_OBJECT = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
   private final val QUERY_WINE_NAME = "SELECT id, wine_name, grape_variety, vintage_year, winery_name, price FROM Wine WHERE wine_name = ?;"
-  private final val QUERY_CUSTOMER_FULL_NAME = "SELECT id, first_name, last_name, email FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
+  private final val QUERY_CUSTOMER = "SELECT id, first_name, last_name, email FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
+  private final val QUERY_CUSTOMER_NAME_EMAIL = "SELECT id, first_name, last_name, email FROM Customer WHERE first_name = ? AND last_name = ? AND email = ?;"
   private final val INSERT_WINE = "INSERT INTO Wine (wine_name, grape_variety, vintage_year, winery_name, price) VALUES (?, ?, ?, ?, ?);"
   private final val INSERT_CUSTOMER = "INSERT INTO Customer (first_name, last_name, email) VALUES (?, ?, ?);"
   private final val UPDATE_WINE = "UPDATE Wine SET price = ? WHERE wine_name = ? AND grape_variety = ? AND vintage_year = ? AND winery_name = ? AND price = ?;"
@@ -161,7 +162,7 @@ case class WineDAOImplementation(connection: PSQLconnection) {
 
   def getCustomer(customer: Customer): Try[Either[String, Customer]] = {
     Try {
-      val preparedStatement = connection.getConnection.prepareStatement(QUERY_CUSTOMER_FULL_NAME)
+      val preparedStatement = connection.getConnection.prepareStatement(QUERY_CUSTOMER)
       preparedStatement.setString(1, customer.firstName)
       preparedStatement.setString(2, customer.lastName)
       preparedStatement.setString(3, customer.email)
@@ -181,6 +182,31 @@ case class WineDAOImplementation(connection: PSQLconnection) {
       }
     }
   }
+
+  def getCustomerByNameEmail(firstName: String, lastName: String, email:String): Try[Either[String, Customer]] = {
+    Try {
+      val preparedStatement = connection.getConnection.prepareStatement(QUERY_CUSTOMER_NAME_EMAIL)
+      preparedStatement.setString(1, firstName)
+      preparedStatement.setString(2, lastName)
+      preparedStatement.setString(3, email)
+      val resultSet = preparedStatement.executeQuery()
+
+      if (resultSet.next()) {
+        val customer = Customer(resultSet.getInt("id"),
+          resultSet.getString("first_name"),
+          resultSet.getString("last_name"),
+          resultSet.getString("email")
+        )
+        preparedStatement.close()
+        Right(customer)
+      } else {
+        preparedStatement.close()
+        Left("Not found")
+      }
+    }
+  }
+
+
 //"INSERT INTO Wine (wine_name, grape_variety, vintage_year, winery_name, price) VALUES (?, ?, ?, ?, ?)"
   def setWine(wine: Wine): Try[Either[String, Wine]] = {
     Try {

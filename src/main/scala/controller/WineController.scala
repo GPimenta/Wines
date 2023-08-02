@@ -48,6 +48,12 @@ case class WineController(wineDAOImplementation: WineDAOImplementation) {
       case Success(result) => result.map(customerUnit => customerUnit)
   }
 
+  def getCustomerByNameEmail(firstName: String, lastName: String, email:String): Either[String, Customer] = {
+    wineDAOImplementation.getCustomerByNameEmail(firstName, lastName, email) match
+      case Failure(exception) => Left("Exception occurred while accessing DB")
+      case Success(result) => result.map(customerUnit => customerUnit)
+  }
+
   def setWine(wine: Wine): Either[String, Wine] = {
     wineDAOImplementation.setWine(wine) match
       case Failure(exception) => Left("Exception occurred while accessing DB")
@@ -59,11 +65,17 @@ case class WineController(wineDAOImplementation: WineDAOImplementation) {
       case Failure(exception) => Left("Exception occurred while accessing DB")
       case Success(result) => result.map(customerUnit => customerUnit)
   }
-  
+
   def updateWine(newWine: NewWine): Either[String, String] = {
     wineDAOImplementation.updateWine(newWine) match
       case Failure(exception) => Left("Exception occurred while accessing DB")
-      case Success(result) => result.map(updated => updated) 
+      case Success(result) => result.map(updated => updated)
+  }
+
+  def updateCustomer(newCustomer: NewCustomer): Either[String, String] = {
+    wineDAOImplementation.updateCustomer(newCustomer) match
+      case Failure(exception) => Left("Exception occurred while accessing DB")
+      case Success(result) => result.map(updated => updated)
   }
 
   def deleteWine(wine: Wine): Either[String, String] = {
