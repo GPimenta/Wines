@@ -2,7 +2,7 @@ package controller
 
 import akka.actor.Status.Success
 import connector.PSQLconnection
-import model.{Customer, Wine}
+import model.{Customer, NewCustomer, NewWine, Wine}
 import org.scalatest.funsuite.AnyFunSuiteLike
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -173,6 +173,208 @@ class WineControllerMockitoTest extends AnyWordSpec with MockitoSugar {
         val result = WineController(dao).getCustomerByNameEmail(firstName, lastName, email)
 
         assert(result == Right(customer))
+      }
+    }
+  }
+
+  "receives a POST action" when {
+    "creates a Wine" should {
+      "returns right with the Wine" in {
+        val dao = mock[WineDAOImplementation]
+        val wine = Wine(1, "test", "test", 2000, "test", 10.0)
+
+        when(dao.setWine(wine)).thenReturn(Try(Right(wine)))
+
+        val result = WineController(dao).setWine(wine)
+
+        assert(result == Right(wine))
+      }
+    }
+  }
+
+  "receives a POST action" when {
+    "does not create a Wine" should {
+      "returns left with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val wine = Wine(1, "test", "test", 2000, "test", 10.0)
+        val message = "No created"
+
+        when(dao.setWine(wine)).thenReturn(Try(Left(message)))
+
+        val result = WineController(dao).setWine(wine)
+
+        assert(result == Left(message))
+      }
+    }
+  }
+
+  "receives a POST action" when {
+    "creates a Customer" should {
+      "returns right with the Customer" in {
+        val dao = mock[WineDAOImplementation]
+        val customer = Customer(1, "test", "test", "test")
+
+        when(dao.setCustomer(customer)).thenReturn(Try(Right(customer)))
+
+        val result = WineController(dao).setCustomer(customer)
+
+        assert(result == Right(customer))
+      }
+    }
+  }
+
+  "receives a POST action" when {
+    "does not create a Customer" should {
+      "returns left with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val customer = Customer(1, "test", "test", "test")
+        val message = "No created"
+
+        when(dao.setCustomer(customer)).thenReturn(Try(Left(message)))
+
+        val result = WineController(dao).setCustomer(customer)
+
+        assert(result == Left(message))
+      }
+    }
+  }
+
+  "receives a PUT action" when {
+    "Updates a Wine" should {
+      "returns right with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val newWine = NewWine(1, "test", "test", 2000, "test", 10.0, 20.0)
+        val wineUpdated = Wine(1, "test", "test", 2000, "test", 20.0)
+        val message = "updated"
+
+
+        when(dao.updateWine(newWine)).thenReturn(Try(Right(message)))
+
+        val result = WineController(dao).updateWine(newWine)
+
+        assert(result == Right(message))
+      }
+    }
+  }
+
+  "receives a PUT action" when {
+    "Does not updates a Wine" should {
+      "returns left with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val newWine = NewWine(1, "test", "test", 2000, "test", 10.0, 20.0)
+        val wineUpdated = Wine(1, "test", "test", 2000, "test", 20.0)
+        val message = "not updated"
+
+
+        when(dao.updateWine(newWine)).thenReturn(Try(Left(message)))
+
+        val result = WineController(dao).updateWine(newWine)
+
+        assert(result == Left(message))
+      }
+    }
+  }
+
+  "receives a PUT action" when {
+    "Updates a Customer" should {
+      "returns right with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val newCustomer = NewCustomer(1, "test", "test", "test", "test2")
+        val customerUpdated = Customer(1, "test", "test", "test2")
+        val message = "updated"
+
+
+        when(dao.updateCustomer(newCustomer)).thenReturn(Try(Right(message)))
+
+        val result = WineController(dao).updateCustomer(newCustomer)
+
+        assert(result == Right(message))
+      }
+    }
+  }
+
+  "receives a PUT action" when {
+    "Does not updates a Customer" should {
+      "returns left with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val newCustomer = NewCustomer(1, "test", "test", "test", "test2")
+        val customerUpdated = Customer(1, "test", "test", "test2")
+        val message = "not updated"
+
+
+        when(dao.updateCustomer(newCustomer)).thenReturn(Try(Left(message)))
+
+        val result = WineController(dao).updateCustomer(newCustomer)
+
+        assert(result == Left(message))
+      }
+    }
+  }
+
+  "receives a Delete action" when {
+    "Deletes a Wine" should {
+      "returns right with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val wineDeleted = Wine(1, "test", "test", 2000, "test", 20.0)
+        val message = "deleted"
+
+
+        when(dao.deleteWine(wineDeleted)).thenReturn(Try(Right(message)))
+
+        val result = WineController(dao).deleteWine(wineDeleted)
+
+        assert(result == Right(message))
+      }
+    }
+  }
+
+  "receives a Delete action" when {
+    "Does not delete a Wine" should {
+      "returns left with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val wineDeleted = Wine(1, "test", "test", 2000, "test", 20.0)
+        val message = "not deleted"
+
+
+        when(dao.deleteWine(wineDeleted)).thenReturn(Try(Left(message)))
+
+        val result = WineController(dao).deleteWine(wineDeleted)
+
+        assert(result == Left(message))
+      }
+    }
+  }
+
+  "receives a Delete action" when {
+    "Deletes a Customer" should {
+      "returns right with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val customerDeleted = Customer(1, "test", "test", "test2")
+        val message = "deleted"
+
+
+        when(dao.deleteCustomer(customerDeleted)).thenReturn(Try(Right(message)))
+
+        val result = WineController(dao).deleteCustomer(customerDeleted)
+
+        assert(result == Right(message))
+      }
+    }
+  }
+
+  "receives a Delete action" when {
+    "Does not delete a Customer" should {
+      "returns left with a message" in {
+        val dao = mock[WineDAOImplementation]
+        val customerDeleted = Customer(1, "test", "test", "test2")
+        val message = "not deleted"
+
+
+        when(dao.deleteCustomer(customerDeleted)).thenReturn(Try(Left(message)))
+
+        val result = WineController(dao).deleteCustomer(customerDeleted)
+
+        assert(result == Left(message))
       }
     }
   }
