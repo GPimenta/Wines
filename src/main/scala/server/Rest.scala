@@ -43,14 +43,14 @@ object Rest extends DefaultJsonProtocol{
               pathEndOrSingleSlash{
                 wineObject.getAllWines match
                   case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                  case Left(emptyList) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Wines is Empty"} """))
+                  case Left(emptyList) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Wines is Empty"} """))
                   case Right(wineList) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine List" : "$wineList"} """))
               },
               //http://localhost:8080/wines/{id}
               path(Segment) {
                 id => wineObject.getWineById(id.toInt) match
                   case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                  case Left(notFound) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Wine with ID $id not found"} """))
+                  case Left(notFound) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Wine with ID $id not found"} """))
                   case Right(wine) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine with id $id" : "$wine"} """))
               },
               //http://localhost:8080/wines/name/?wine_name=Pinot%20Noir
@@ -59,7 +59,7 @@ object Rest extends DefaultJsonProtocol{
                   wineName =>
                     wineObject.getWineByName(wineName) match
                       case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                      case Left(emptyList) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Wines is Empty"} """))
+                      case Left(emptyList) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Wines is Empty"} """))
                       case Right(wineList) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine List" : "$wineList"} """))
                 }
               }
@@ -71,8 +71,8 @@ object Rest extends DefaultJsonProtocol{
                 wine =>
                   wineObject.setWine(wine) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(failedInsertion) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Insertion failed"} """))
-                    case Right(wineInserted) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine inserted"} """))
+                    case Left(failedInsertion) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Insertion failed"} """))
+                    case Right(wineInserted) => complete(Created, HttpEntity(ContentTypes.`application/json`,s""" {"Wine inserted"} """))
               }
             }
           },
@@ -82,7 +82,7 @@ object Rest extends DefaultJsonProtocol{
                 newWine =>
                   wineObject.updateWine(newWine) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(failedUpdate) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Update failed"} """))
+                    case Left(failedUpdate) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Update failed"} """))
                     case Right(wineUpdated) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine updated"} """))
               }
             }
@@ -93,7 +93,7 @@ object Rest extends DefaultJsonProtocol{
                 wine =>
                   wineObject.deleteWine(wine) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(failedDelete) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Delete failed"} """))
+                    case Left(failedDelete) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Delete failed"} """))
                     case Right(wineDeleted) => complete(OK, HttpEntity(ContentTypes.`application/json`,s""" {"Wine Deleted"} """))
               }
             }
@@ -109,14 +109,14 @@ object Rest extends DefaultJsonProtocol{
               pathEndOrSingleSlash{
                 wineObject.getAllCustomers match
                   case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                  case Left(emptyList) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Customer is Empty"} """))
+                  case Left(emptyList) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "List of Customer is Empty"} """))
                   case Right(customerList) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer List" : "$customerList"} """))
               },
               path(Segment) {
                 id =>
                   wineObject.getCustomerById(id.toInt) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(notFound) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Customer with ID $id not found"} """))
+                    case Left(notFound) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Customer with ID $id not found"} """))
                     case Right(wine) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer with id $id" : "$wine"} """))
               },
               pathPrefix("name") {
@@ -124,7 +124,7 @@ object Rest extends DefaultJsonProtocol{
                   (firstName, lastName, email) =>
                     wineObject.getCustomerByNameEmail(firstName, lastName, email) match
                       case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                      case Left(notFound) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Customer not found"} """))
+                      case Left(notFound) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Customer not found"} """))
                       case Right(customer) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer" : "$customer"} """))
                 }
               }
@@ -136,8 +136,8 @@ object Rest extends DefaultJsonProtocol{
                 customer =>
                   wineObject.setCustomer(customer) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(failedInsertion) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Insertion failed"} """))
-                    case Right(customerInserted) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer inserted"} """))
+                    case Left(failedInsertion) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Insertion failed"} """))
+                    case Right(customerInserted) => complete(Created, HttpEntity(ContentTypes.`application/json`, s""" {"Customer inserted"} """))
               }
             }
           },
@@ -147,7 +147,7 @@ object Rest extends DefaultJsonProtocol{
                 newCustomer =>
                   wineObject.updateCustomer(newCustomer) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(failedUpdate) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Update failed"} """))
+                    case Left(failedUpdate) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Update failed"} """))
                     case Right(customerUpdated) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer updated"} """))
               }
             }
@@ -158,7 +158,7 @@ object Rest extends DefaultJsonProtocol{
                 customer =>
                   wineObject.deleteCustomer(customer) match
                     case Left(exception) if exception.equals("Exception occurred while accessing DB") => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"exception" : "$exception"} """))
-                    case Left(failedInsertion) => complete(InternalServerError, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Delete failed"} """))
+                    case Left(failedInsertion) => complete(NotFound, HttpEntity(ContentTypes.`application/json`, s""" {"message" : "Delete failed"} """))
                     case Right(customerInserted) => complete(OK, HttpEntity(ContentTypes.`application/json`, s""" {"Customer deleted"} """))
               }
             }

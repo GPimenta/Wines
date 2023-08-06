@@ -8,7 +8,6 @@ import java.util.concurrent.{Executor, Executors}
 
 case class PSQLconnection(host: String, port: String, database: String) {
   final val basePath = "jdbc:postgresql:"
-//  final val URL = basePath + "//" + host + ":" + port + database
   final val URL = basePath + s"//$host:$port/$database"
 
   val username = "postgres"
