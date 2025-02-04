@@ -138,7 +138,7 @@ Updates information for an existing wine in the database.
 - **newPrice** (Number, Required) - Updated price of the wine.
 
 **Returns:**
-- Success message if the wine is updated - 200 OK
+- Success message if the wine is updated - 200 OK 2
 - Error message if the wine with the specified ID does not exist - 404 Not Found
 
 **Example Request:**
